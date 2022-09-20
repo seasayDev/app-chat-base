@@ -1,0 +1,15 @@
+<div class="quit"><button (click)="onQuit()">Quitter</button></div>
+<div class="chat">
+  <div #chatContainer class="messages">
+    <div *ngFor="let m of messages; let i = index">
+      <h3 *ngIf="showDateHeader(messages, i)">
+        {{ m.timestamp | date }}
+      </h3>
+      <p>[{{ m.timestamp | date: "hh:mm" }}] {{ m.username }} : {{ m.text }}</p>
+    </div>
+  </div>
+  <form (ngSubmit)="onSendMessage()" [formGroup]="messageForm">
+    <input name="message" type="text" formControlName="msg" />
+    <button type="submit">></button>
+  </form>
+</div>
