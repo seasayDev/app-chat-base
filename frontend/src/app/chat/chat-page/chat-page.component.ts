@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { FormBuilder } from "@angular/forms";
 import { Subscription } from "rxjs";
-import { LoginService } from "src/app/login/login.service";
+import { AuthenticationService } from "src/app/login/authentication.service";
 import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
+import { FormBuilder } from "@angular/forms";
 
 @Component({
   selector: "app-chat-page",
@@ -12,24 +12,24 @@ import { MessagesService } from "../messages.service";
 })
 export class ChatPageComponent implements OnInit, OnDestroy {
   messages$ = this.messagesService.getMessages();
-  username$ = this.loginService.getUsername();
+  username$ = this.authenticationService.getUsername();
 
   messageForm = this.fb.group({
     msg: "",
   });
 
-  currentUsername: string | null = null;
+  username: string | null = null;
   usernameSubscription: Subscription;
 
-  messages: Message[] | null = null;
+  messages: Message[] = [];
 
   constructor(
     private fb: FormBuilder,
     private messagesService: MessagesService,
-    private loginService: LoginService
+    private authenticationService: AuthenticationService
   ) {
     this.usernameSubscription = this.username$.subscribe((u) => {
-      this.currentUsername = u;
+      this.username = u;
     });
   }
 
@@ -41,16 +41,11 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSendMessage() {
-    if (
-      this.currentUsername &&
-      this.messageForm.valid &&
-      this.messageForm.value.msg
-    ) {
+  onPublishMessage() {
+    if (this.username && this.messageForm.valid && this.messageForm.value.msg) {
       this.messagesService.postMessage({
-        id: null,
         text: this.messageForm.value.msg,
-        username: this.currentUsername,
+        username: this.username,
         timestamp: Date.now(),
       });
     }
@@ -71,7 +66,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  onQuit() {
+  onLogout() {
     // À faire
   }
 }

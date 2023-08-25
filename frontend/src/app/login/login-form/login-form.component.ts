@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
+import { UserCredentials } from "../model/user-credentials";
 
 @Component({
   selector: "app-login-form",
@@ -13,7 +14,7 @@ export class LoginFormComponent implements OnInit {
   });
 
   @Output()
-  login = new EventEmitter<{ username: string; password: string }>();
+  login = new EventEmitter<UserCredentials>();
 
   constructor(private fb: FormBuilder) {}
 

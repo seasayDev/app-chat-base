@@ -1,19 +1,20 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
+import { UserCredentials } from "./model/user-credentials";
 
 @Injectable({
   providedIn: "root",
 })
-export class LoginService {
+export class AuthenticationService {
   static KEY = "username";
 
   private username = new BehaviorSubject<string | null>(null);
 
   constructor() {
-    this.username.next(localStorage.getItem(LoginService.KEY));
+    this.username.next(localStorage.getItem(AuthenticationService.KEY));
   }
 
-  login(login: { username: string; password: string }) {
+  login(userCredentials: UserCredentials) {
     // À faire
   }
 
