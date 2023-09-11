@@ -1,17 +1,21 @@
-<div class="quit"><button (click)="onLogout()">D</button></div>
 <div class="chat">
-  <div #chatContainer class="messages">
-    <div *ngFor="let m of messages; let i = index">
-      <h3 *ngIf="showDateHeader(messages, i)">
-        {{ m.timestamp | date }}
-      </h3>
-      <p>
-        [{{ m.timestamp | date : "hh:mm" }}] {{ m.username }} : {{ m.text }}
-      </p>
-    </div>
+  <div class="chat-logout-button">
+    <button (click)="onLogout()">Quitter</button>
   </div>
-  <form (ngSubmit)="onPublishMessage()" [formGroup]="messageForm">
-    <input name="message" type="text" formControlName="msg" />
-    <button type="submit">></button>
-  </form>
+  <div class="chat-messages">
+    <div #chatContainer class="messages">
+      <div *ngFor="let m of messages; let i = index">
+        <h3 *ngIf="showDateHeader(messages, i)">
+          {{ m.timestamp | date }}
+        </h3>
+        <p>
+          [{{ m.timestamp | date : "hh:mm" }}] {{ m.username }} : {{ m.text }}
+        </p>
+      </div>
+    </div>
+    <form (ngSubmit)="onPublishMessage()" [formGroup]="messageForm">
+      <input name="message" type="text" formControlName="msg" />
+      <button type="submit">></button>
+    </form>
+  </div>
 </div>
