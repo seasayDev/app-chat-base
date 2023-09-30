@@ -27,7 +27,7 @@ export class LoginFormComponent implements OnInit {
     if (username && password) {
       const userCredentials: UserCredentials = {
         username: username,
-        password: password[0],
+        password: password,
       };
       this.login.emit(userCredentials);
     } else {
