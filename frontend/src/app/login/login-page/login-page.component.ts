@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { UserCredentials } from "../model/user-credentials";
 import { AuthenticationService } from "../authentication.service";
-import { Router } from "@angular/router"; // Importez Router
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-login-page",
@@ -12,7 +12,7 @@ export class LoginPageComponent implements OnInit {
   constructor(
     private authService: AuthenticationService,
     private router: Router
-  ) {} // Injectez Router) {}
+  ) {}
 
   ngOnInit(): void {}
 
@@ -21,8 +21,8 @@ export class LoginPageComponent implements OnInit {
       (success: boolean) => {
         if (success) {
           console.log("Connexion réussie");
-          // Rediger la connexion vers le chat 
-          this.router.navigate(["/chat"]); 
+          // Rediger vers le chat
+          this.router.navigate(["/chat"]);
         } else {
           console.log("Échec de la connexion");
         }

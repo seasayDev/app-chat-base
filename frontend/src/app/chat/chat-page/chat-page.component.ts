@@ -4,6 +4,7 @@ import { AuthenticationService } from "src/app/login/authentication.service";
 import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
 import { FormBuilder } from "@angular/forms";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-chat-page",
@@ -26,14 +27,26 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private messagesService: MessagesService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private router: Router
   ) {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.messages$.subscribe((messages) => {
+      this.messages = messages;
+      // Faites défiler vers le bas pour afficher le nouveau message
+      setTimeout(() => {
+        const chatContainer = document.querySelector(".messages");
+        if (chatContainer) {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+      }, 0);
+    });
+  }
 
   ngOnDestroy(): void {
     if (this.usernameSubscription) {
@@ -41,32 +54,23 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onPublishMessage() {
-    if (this.username && this.messageForm.valid && this.messageForm.value.msg) {
-      this.messagesService.postMessage({
-        text: this.messageForm.value.msg,
-        username: this.username,
-        timestamp: Date.now(),
-      });
-    }
+  onNewMessage(msg: Message) {
+    // Ajoutez le nouveau message à la liste des messages
+    this.messages.push(msg);
+    // Réinitialisez le formulaire
     this.messageForm.reset();
-  }
-
-  /** Afficher la date seulement si la date du message précédent est différente du message courant. */
-  showDateHeader(messages: Message[] | null, i: number) {
-    if (messages != null) {
-      if (i === 0) {
-        return true;
-      } else {
-        const prev = new Date(messages[i - 1].timestamp).setHours(0, 0, 0, 0);
-        const curr = new Date(messages[i].timestamp).setHours(0, 0, 0, 0);
-        return prev != curr;
+    // Faites défiler vers le bas pour afficher le nouveau message
+    setTimeout(() => {
+      const chatContainer = document.querySelector(".messages");
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
       }
-    }
-    return false;
+    }, 0);
   }
 
+  /**Methode de déconnexion. */
   onLogout() {
-    // À faire
+    this.authenticationService.logout();
+    this.router.navigate(["/"]);
   }
 }

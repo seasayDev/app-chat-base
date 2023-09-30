@@ -11,7 +11,12 @@ export class MessagesService {
   constructor() {}
 
   postMessage(message: Message): void {
-    // À faire
+    // Récupérez le tableau de messages actuel
+    const currentMessages = this.messages.getValue();
+    // Ajoutez le nouveau message au tableau
+    currentMessages.push(message);
+    // Émettez le nouveau tableau de messages
+    this.messages.next(currentMessages);
   }
 
   getMessages(): Observable<Message[]> {

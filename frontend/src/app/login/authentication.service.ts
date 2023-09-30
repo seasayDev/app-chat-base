@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
 import { UserCredentials } from "./model/user-credentials";
+import { of} from "rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -15,11 +16,19 @@ export class AuthenticationService {
   }
 
   login(userCredentials: UserCredentials) {
-    // À faire
+    // Stocker le nom d'utilisateur dans le localStorage
+    localStorage.setItem(AuthenticationService.KEY, userCredentials.username);
+    // Mettre à jour le nom d'utilisateur connecté
+    this.username.next(userCredentials.username);
+    // Pour l'instant, nous allons simplement retourner un Observable de true
+    return of(true);
   }
 
   logout() {
-    // À faire
+    // Supprimer le nom d'utilisateur du localStorage
+    localStorage.removeItem(AuthenticationService.KEY);
+    // Mettre à jour le nom d'utilisateur connecté
+    this.username.next(null);
   }
 
   getUsername(): Observable<string | null> {
