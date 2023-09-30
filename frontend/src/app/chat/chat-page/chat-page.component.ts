@@ -38,7 +38,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.messages$.subscribe((messages) => {
       this.messages = messages;
-      // Faites défiler vers le bas pour afficher le nouveau message
       setTimeout(() => {
         const chatContainer = document.querySelector(".messages");
         if (chatContainer) {
@@ -59,7 +58,8 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.messages.push(msg);
     // Réinitialisez le formulaire
     this.messageForm.reset();
-    // Faites défiler vers le bas pour afficher le nouveau message
+
+    //Defiler vers le dernier message
     setTimeout(() => {
       const chatContainer = document.querySelector(".messages");
       if (chatContainer) {
