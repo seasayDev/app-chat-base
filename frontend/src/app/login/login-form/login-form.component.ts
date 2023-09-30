@@ -21,6 +21,19 @@ export class LoginFormComponent implements OnInit {
   ngOnInit(): void {}
 
   onLogin() {
-    // À faire
+    const username = this.loginForm.controls.username.value;
+    const password = this.loginForm.controls.password.value;
+
+    if (username && password) {
+      const userCredentials: UserCredentials = {
+        username: username,
+        password: password[0],
+      };
+      this.login.emit(userCredentials);
+    } else {
+      console.log(
+        "Les champs nom d'utilisateur et mot de passe doivent contenir au moins un caractère."
+      );
+    }
   }
 }
