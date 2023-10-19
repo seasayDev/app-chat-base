@@ -3,7 +3,6 @@ import { Subscription } from "rxjs";
 import { AuthenticationService } from "src/app/login/authentication.service";
 import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
-import { FormBuilder } from "@angular/forms";
 import { Router } from "@angular/router";
 
 @Component({
@@ -15,60 +14,46 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   messages$ = this.messagesService.getMessages();
   username$ = this.authenticationService.getUsername();
 
-  messageForm = this.fb.group({
-    msg: "",
-  });
-
   username: string | null = null;
   usernameSubscription: Subscription;
 
   messages: Message[] = [];
+  messagesSubscription: Subscription;
 
   constructor(
-    private fb: FormBuilder,
+    private router: Router,
     private messagesService: MessagesService,
-    private authenticationService: AuthenticationService,
-    private router: Router
+    private authenticationService: AuthenticationService
   ) {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
     });
-  }
-
-  ngOnInit(): void {
-    this.messages$.subscribe((messages) => {
-      this.messages = messages;
-      setTimeout(() => {
-        const chatContainer = document.querySelector(".messages");
-        if (chatContainer) {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-      }, 0);
+    this.messagesSubscription = this.messages$.subscribe((m) => {
+      this.messages = m;
     });
   }
+
+  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     if (this.usernameSubscription) {
       this.usernameSubscription.unsubscribe();
     }
+    if (this.messagesSubscription) {
+      this.messagesSubscription.unsubscribe();
+    }
   }
 
-  onNewMessage(msg: Message) {
-    // Ajoutez le nouveau message à la liste des messages
-    this.messages.push(msg);
-    // Réinitialisez le formulaire
-    this.messageForm.reset();
-
-    //Defiler vers le dernier message
-    setTimeout(() => {
-      const chatContainer = document.querySelector(".messages");
-      if (chatContainer) {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
-    }, 0);
+  onPublishMessage(message: string) {
+    if (this.username != null) {
+      this.messagesService.postMessage({
+        text: message,
+        username: this.username,
+        timestamp: Date.now(),
+      });
+    }
   }
 
-  /**Methode de déconnexion. */
   onLogout() {
     this.authenticationService.logout();
     this.router.navigate(["/"]);

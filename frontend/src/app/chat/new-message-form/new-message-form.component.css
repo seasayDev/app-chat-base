@@ -1,21 +1,7 @@
-.input-field {
+form {
   display: flex;
-  align-items: center;
 }
 
-input[type="text"] {
+mat-form-field {
   flex: 1;
-  border: none;
-  border-radius: 20px;
-  height: 10px;
-  padding: 5px 0;
-  width: calc(100% - 70px);
-}
-
-.send-button {
-  margin-left: auto;
-  border: none;
-  background-color: #673ab7;
-  color: white;
-  border-radius: 50%;
 }

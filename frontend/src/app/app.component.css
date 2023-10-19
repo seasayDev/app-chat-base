@@ -1,3 +1,7 @@
+h1 {
+  padding: 1em;
+}
+
 div.page {
   display: flex;
   flex-direction: column;
@@ -5,5 +9,4 @@ div.page {
 
   margin-left: 20%;
   margin-right: 20%;
-  margin-top: 3%;
 }

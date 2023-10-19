@@ -1,7 +1,15 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
 import { UserCredentials } from "./model/user-credentials";
-import { of} from "rxjs";
+import { HttpClient } from "@angular/common/http"; // Import HttpClient
+import { firstValueFrom } from "rxjs"; // Import firstValueFrom
+import { environment } from "../../environments/environment"; // Import environment
+
+// Création de l'interface LoginResponse
+export interface LoginResponse {
+  token: string;
+  // Ajoutez ici d'autres champs selon la réponse de votre backend
+}
 
 @Injectable({
   providedIn: "root",
@@ -11,23 +19,32 @@ export class AuthenticationService {
 
   private username = new BehaviorSubject<string | null>(null);
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
+    // Inject HttpClient
     this.username.next(localStorage.getItem(AuthenticationService.KEY));
   }
 
-  login(userCredentials: UserCredentials) {
-    // Stocker le nom d'utilisateur dans le localStorage
+  async login(userCredentials: UserCredentials) {
+    const loginResponse = await firstValueFrom(
+      this.httpClient.post<LoginResponse>(
+        `${environment.backendUrl}/auth/login`,
+        userCredentials,
+        { withCredentials: true }
+      )
+    );
     localStorage.setItem(AuthenticationService.KEY, userCredentials.username);
-    // Mettre à jour le nom d'utilisateur connecté
     this.username.next(userCredentials.username);
-    // Pour l'instant, nous allons simplement retourner un Observable de true
-    return of(true);
   }
 
-  logout() {
-    // Supprimer le nom d'utilisateur du localStorage
+  async logout() {
+    await firstValueFrom(
+      this.httpClient.post(
+        `${environment.backendUrl}/auth/logout`,
+        {},
+        { withCredentials: true }
+      )
+    );
     localStorage.removeItem(AuthenticationService.KEY);
-    // Mettre à jour le nom d'utilisateur connecté
     this.username.next(null);
   }
 

@@ -1,26 +1,5 @@
 .form {
-  margin-top: 15%;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.form div {
-  margin-bottom: 0.2em;
-}
-
-.form label {
-  display: block;
-  margin-bottom: 0.1em;
-}
-
-.form input {
-  width: 100%;
-  padding: 0.1em;
-}
-
-.form button {
-  padding: 0.5em;
-  background-color: #673ab7;
-  color: white;
 }

@@ -9,35 +9,11 @@
   margin-bottom: 3px;
 }
 
-.chat-logout-button button {
-  background-color: #673ab7;
-  color: white;
-}
-
 .chat-messages {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
   border-color: gray;
   border-style: solid;
   border-width: 1px;
-  width: 45vw; /* Réduisez la largeur à votre convenance */
-}
-
-.messages {
-  height: 70vh;
-  overflow-y: scroll;
-  text-align: left;
-  padding: 30px;
-}
-
-p {
-  margin: 10px;
-}
-
-form {
-  display: flex;
-}
-
-input[type="text"] {
-  flex: 1;
+  width: 60vw;
 }

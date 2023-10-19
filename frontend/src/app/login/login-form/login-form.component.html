@@ -2,7 +2,7 @@
   <form class="form" (ngSubmit)="onLogin()" [formGroup]="loginForm">
     <div>
       <div>
-        <mat-form-field appearance="fill">
+        <mat-form-field>
           <mat-label>Nom d'usager</mat-label>
           <input
             matInput
@@ -13,7 +13,7 @@
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field appearance="fill">
+        <mat-form-field>
           <mat-label>Mot de passe</mat-label>
           <input
             matInput
@@ -24,6 +24,8 @@
         </mat-form-field>
       </div>
     </div>
-    <div><button mat-raised-button type="submit">Connexion</button></div>
+    <div>
+      <button mat-raised-button color="primary" type="submit">Connexion</button>
+    </div>
   </form>
 </div>
