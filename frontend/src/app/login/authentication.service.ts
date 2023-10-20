@@ -51,4 +51,8 @@ export class AuthenticationService {
   getUsername(): Observable<string | null> {
     return this.username.asObservable();
   }
+
+  isLoggedIn(): boolean {
+    return this.username.value !== null;
+  }
 }

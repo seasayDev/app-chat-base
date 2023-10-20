@@ -25,6 +25,7 @@ public class MessageController {
         this.webSocketManager = webSocketManager;
     }
 
+        
     @GetMapping(MESSAGES_PATH)
     public ResponseEntity<?> getMessages() {
         return ResponseEntity.ok(messageRepository.getMessages(null));

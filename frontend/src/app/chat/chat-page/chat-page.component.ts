@@ -33,7 +33,11 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    if (this.authenticationService.isLoggedIn()) {
+      this.messagesService.fetchMessages();
+    }
+  }
 
   ngOnDestroy(): void {
     if (this.usernameSubscription) {
@@ -45,12 +49,21 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   onPublishMessage(message: string) {
-    if (this.username != null) {
-      this.messagesService.postMessage({
-        text: message,
-        username: this.username,
-        timestamp: Date.now(),
-      });
+    if (this.authenticationService.isLoggedIn()) {
+      if (this.username != null) {
+        const newMessage: Message = {
+          id: Date.now(), // Utilisez le timestamp comme id unique
+          text: message,
+          username: this.username,
+          timestamp: Date.now(),
+        };
+        this.messagesService.postMessage(newMessage);
+      }
+    } else {
+      // Rediriger l'utilisateur vers la page de connexion
+      // ou afficher un message d'erreur
+      console.log("Vous devez être connecté pour publier un message.");
+      this.router.navigate(["/login"]);
     }
   }
 

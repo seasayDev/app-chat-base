@@ -13,21 +13,22 @@ public class MessageRepository {
     private final List<Message> messages = new ArrayList<Message>();
     private final AtomicLong idGenerator = new AtomicLong(0);
 
-    public List<Message> getMessages(Long fromId) {
-        // Ignorer le paramètre fromId pour le moment
-        return new ArrayList<>(messages);
-    }
+   public List<Message> getMessages(Long fromId) {
+    // Ignorer le paramètre fromId pour le moment
+    return new ArrayList<>(messages);
+}
 
-    public Message createMessage(Message message) {
-        // Générer un nouvel ID pour le message
-        long id = idGenerator.incrementAndGet();
+public Message createMessage(Message message) {
+    // Générer un nouvel ID pour le message
+    long id = idGenerator.incrementAndGet();
 
-        // Créer un nouveau message avec l'ID généré
-        Message newMessage = new Message(id, message.username(), message.timestamp(), message.text());
+    // Créer un nouveau message avec l'ID généré
+    Message newMessage = new Message(id, message.username(), message.timestamp(), message.text());
 
-        // Ajouter le message à la liste
-        messages.add(newMessage);
+    // Ajouter le message à la liste
+    messages.add(newMessage);
 
-        return newMessage;
-    }
+    return newMessage;
+}
+
 }
