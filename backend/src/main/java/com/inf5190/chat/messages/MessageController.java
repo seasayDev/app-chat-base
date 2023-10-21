@@ -34,6 +34,8 @@ public class MessageController {
     @PostMapping(MESSAGES_PATH)
     public ResponseEntity<?> createMessage(@RequestBody Message message) {
         Message newMessage = messageRepository.createMessage(message);
+        // Notifie toutes les sessions websocket actives après la publication d'un message
+        webSocketManager.notifySessions();
         return ResponseEntity.ok(newMessage);
     }
 }

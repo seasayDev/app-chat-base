@@ -4,6 +4,7 @@ import { AuthenticationService } from "src/app/login/authentication.service";
 import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
+import { WebSocketService } from "../../service/websocket.service"; // Importez le WebSocketService
 
 @Component({
   selector: "app-chat-page",
@@ -23,7 +24,8 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private messagesService: MessagesService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private webSocketService: WebSocketService // Injectez le WebSocketService
   ) {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
@@ -36,6 +38,12 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.authenticationService.isLoggedIn()) {
       this.messagesService.fetchMessages();
+      // Connectez-vous au WebSocket et rafraichissez la liste de messages lors de la réception d'un événement "notif"
+      this.webSocketService.connect().subscribe((event) => {
+        if (event === "notif") {
+          this.messagesService.fetchMessages();
+        }
+      });
     }
   }
 
@@ -46,6 +54,8 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     if (this.messagesSubscription) {
       this.messagesSubscription.unsubscribe();
     }
+    // Déconnectez-vous du WebSocket
+    this.webSocketService.disconnect();
   }
 
   onPublishMessage(message: string) {
