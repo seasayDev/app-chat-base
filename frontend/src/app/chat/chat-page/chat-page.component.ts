@@ -4,7 +4,7 @@ import { AuthenticationService } from "src/app/login/authentication.service";
 import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
-import { WebSocketService } from "../../service/websocket.service"; // Importez le WebSocketService
+import { WebSocketService } from "../../service/websocket.service"; 
 
 @Component({
   selector: "app-chat-page",
@@ -25,7 +25,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     private router: Router,
     private messagesService: MessagesService,
     private authenticationService: AuthenticationService,
-    private webSocketService: WebSocketService // Injectez le WebSocketService
+    private webSocketService: WebSocketService 
   ) {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
@@ -38,7 +38,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.authenticationService.isLoggedIn()) {
       this.messagesService.fetchMessages();
-      // Connectez-vous au WebSocket et rafraichissez la liste de messages lors de la réception d'un événement "notif"
+      // Connectez-vous au WebSocket et rafraichissez la liste de messages
       this.webSocketService.connect().subscribe((event) => {
         if (event === "notif") {
           this.messagesService.fetchMessages();
@@ -62,7 +62,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     if (this.authenticationService.isLoggedIn()) {
       if (this.username != null) {
         const newMessage: Message = {
-          id: Date.now(), // Utilisez le timestamp comme id unique
+          id: Date.now(), 
           text: message,
           username: this.username,
           timestamp: Date.now(),
@@ -70,8 +70,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
         this.messagesService.postMessage(newMessage);
       }
     } else {
-      // Rediriger l'utilisateur vers la page de connexion
-      // ou afficher un message d'erreur
+      
       console.log("Vous devez être connecté pour publier un message.");
       this.router.navigate(["/login"]);
     }

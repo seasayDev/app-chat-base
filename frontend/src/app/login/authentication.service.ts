@@ -8,7 +8,7 @@ import { environment } from "../../environments/environment"; // Import environm
 // Création de l'interface LoginResponse
 export interface LoginResponse {
   token: string;
-  // Ajoutez ici d'autres champs selon la réponse de votre backend
+  
 }
 
 @Injectable({
@@ -20,7 +20,7 @@ export class AuthenticationService {
   private username = new BehaviorSubject<string | null>(null);
 
   constructor(private httpClient: HttpClient) {
-    // Inject HttpClient
+    
     this.username.next(localStorage.getItem(AuthenticationService.KEY));
   }
 

@@ -32,27 +32,27 @@ public class AuthController {
 
     @PostMapping(AUTH_LOGIN_PATH)
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        // Créer un nouvel objet de type SessionData qui représente la session de l'usager
+        // Créer un nouvel objet de type SessionData
         SessionData sessionData = new SessionData(loginRequest.username());
 
-        // Ajouter cet objet dans le SessionManager en utilisant la méthode addSession
+        // Ajouter cet objet dans le SessionManager
         String sessionId = this.sessionManager.addSession(sessionData);
 
-        // Créer un cookie HTTP nommé 'sid' qui contient l'identifiant de session
+        // Créer un cookie HTTP nommé 
         ResponseCookie cookie = ResponseCookie.from(SESSION_ID_COOKIE_NAME, sessionId)
-            .httpOnly(true) // Le cookie ne peut pas être accédé par du code côté client
-            .secure(true) // Le cookie ne peut être envoyé que sur une connexion sécurisée
-            .path("/") // Le cookie est valable pour tout le domaine
-            .maxAge(24 * 60 * 60) // Le cookie expire après 24 heures
+            .httpOnly(true) 
+            .secure(true) 
+            .path("/") 
+            .maxAge(24 * 60 * 60) 
             .build();
 
-        // Créer un objet de type LoginResponse qui contient le nom de l'utilisateur
+        // Créer un objet de type LoginResponse 
         LoginResponse loginResponse = new LoginResponse(loginRequest.username());
 
         // Construire la réponse avec le cookie et le corps
-        return ResponseEntity.ok() // Le code de statut HTTP est 200 (OK)
-            .header(HttpHeaders.SET_COOKIE, cookie.toString()) // Ajouter le cookie dans l'en-tête de la réponse
-            .body(loginResponse); // Ajouter le corps de la réponse
+        return ResponseEntity.ok() 
+            .header(HttpHeaders.SET_COOKIE, cookie.toString()) 
+            .body(loginResponse); 
     }
 
     @PostMapping(AUTH_LOGOUT_PATH)
@@ -61,10 +61,10 @@ public class AuthController {
         this.sessionManager.removeSession(sessionId);
 
         ResponseCookie cookie = ResponseCookie.from(SESSION_ID_COOKIE_NAME, "")
-            .httpOnly(true) // Le cookie ne peut pas être accédé par du code côté client
-            .secure(true) // Le cookie ne peut être envoyé que sur une connexion sécurisée
-            .path("/") // Le cookie est valable pour tout le domaine
-            .maxAge(0) // Expire immédiatement
+            .httpOnly(true) 
+            .secure(true) 
+            .path("/") 
+            .maxAge(0) 
             .build();
 
         return ResponseEntity.ok()

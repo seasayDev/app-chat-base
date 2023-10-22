@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
-import { HttpClient } from "@angular/common/http"; // Import HttpClient
+import { HttpClient } from "@angular/common/http"; 
 import { Message } from "./message.model";
-import { environment } from "../../environments/environment"; // Import environment
+import { environment } from "../../environments/environment"; 
 
 @Injectable({
   providedIn: "root",
@@ -10,13 +10,13 @@ import { environment } from "../../environments/environment"; // Import environm
 export class MessagesService {
   messages = new BehaviorSubject<Message[]>([]);
 
-  constructor(private httpClient: HttpClient) {} // Inject HttpClient
+  constructor(private httpClient: HttpClient) {} 
 
   fetchMessages(): void {
     this.httpClient
       .get<Message[]>(`${environment.backendUrl}/messages`, {
         withCredentials: true,
-      }) // Ajout de l'option withCredentials
+      }) 
       .subscribe((messages) => {
         if (messages) {
           this.messages.next(messages);
@@ -29,7 +29,7 @@ export class MessagesService {
     this.httpClient
       .post(`${environment.backendUrl}/messages`, newMessage, {
         withCredentials: true,
-      }) // Ajout de l'option withCredentials
+      }) 
       .subscribe(() => {
         this.fetchMessages();
       });
