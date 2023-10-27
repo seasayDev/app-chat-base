@@ -4,6 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.inf5190.chat.auth.AuthController;
 import com.inf5190.chat.auth.filter.AuthFilter;
@@ -59,11 +61,12 @@ public class ChatApplication {
 
     return registrationBean;
   }
-}
-/**
- * Fonction qui encode le mot de passe  
- */
-@Bean
-public PasswordEncoder getPasswordEncoder() {
-return new BCryptPasswordEncoder();
+
+  /**
+   * Fonction qui encode le mot de passe  
+   */
+  @Bean
+  public PasswordEncoder getPasswordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }
