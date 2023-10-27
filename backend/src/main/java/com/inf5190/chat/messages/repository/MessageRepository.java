@@ -5,6 +5,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.cloud.Timestamp;
 
 import com.inf5190.chat.messages.model.Message;
+import com.inf5190.chat.messages.model.NewMessageRequest; 
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,7 +37,8 @@ public class MessageRepository {
                         doc.getId(),
                         doc.getString("username"),
                         timestampMillis,
-                        doc.getString("text")
+                        doc.getString("text"),
+                        null
                     );
                 })
                 .collect(Collectors.toList());
@@ -48,22 +50,14 @@ public class MessageRepository {
         }
     }
 
-    public Message createMessage(Message message) {
-        try {
-            FirestoreMessage firestoreMessage = new FirestoreMessage(message.username(), Timestamp.now(), message.text());
-            CollectionReference messagesRef = firestore.collection("messages");
-            DocumentReference docRef = messagesRef.add(firestoreMessage).get();
-            String id = docRef.getId();
-            DocumentSnapshot documentSnapshot = docRef.get().get();
-            Timestamp timestamp = documentSnapshot.getUpdateTime();
-            Message newMessage = new Message(id, message.username(), timestamp.toDate().getTime(), message.text());
-            return newMessage;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return null; 
-        }
+    public Message createMessage(NewMessageRequest newMessageRequest) throws InterruptedException, ExecutionException {
+        FirestoreMessage firestoreMessage = new FirestoreMessage(newMessageRequest.username(), Timestamp.now(), newMessageRequest.text(), null);
+        CollectionReference messagesRef = firestore.collection("messages");
+        DocumentReference docRef = messagesRef.add(firestoreMessage).get();
+        String id = docRef.getId();
+        DocumentSnapshot documentSnapshot = docRef.get().get();
+        Timestamp timestamp = documentSnapshot.getUpdateTime();
+        Message newMessage = new Message(id, newMessageRequest.username(), timestamp.toDate().getTime(), newMessageRequest.text(), null);
+        return newMessage;
     }
 }
-
-
-

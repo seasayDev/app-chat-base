@@ -16,7 +16,11 @@ export class MessagesService {
     return firstValueFrom(
       this.httpClient.post<Message>(
         `${environment.backendUrl}/messages`,
-        message,
+        {
+          text: message.text,
+          username: message.username,
+          imageData: null, // assigner la valeur null au champ imageData pour le moment
+        },
         {
           withCredentials: true,
         }
