@@ -25,14 +25,14 @@ public class MessageController {
     private WebSocketManager webSocketManager;
 
     public MessageController(MessageRepository messageRepository,
-            WebSocketManager webSocketManager,
-            SessionDataAccessor sessionDataAccessor) {
+                             WebSocketManager webSocketManager,
+                             SessionDataAccessor sessionDataAccessor) {
         this.messageRepository = messageRepository;
         this.webSocketManager = webSocketManager;
     }
 
     @GetMapping(MESSAGES_PATH)
-    public List<Message> getMessages(@RequestParam Optional<Long> fromId) {
+    public List<Message> getMessages(@RequestParam Optional<String> fromId) {
         return this.messageRepository.getMessages(fromId.orElse(null));
     }
 
