@@ -26,7 +26,8 @@ public class WebSocketManager {
     }
 
     /**
-     * Fonction pour envoyer une notification à toutes les sessions websocket actives.
+     * Fonction pour envoyer une notification à toutes les sessions websocket
+     * actives.
      */
     public void notifySessions() {
         for (WebSocketSession s : sessions.values()) {

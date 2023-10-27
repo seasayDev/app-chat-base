@@ -1,10 +1,9 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { AuthenticationService } from "src/app/login/authentication.service";
-import { Message } from "../message.model";
 import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
-import { WebSocketService } from "../../service/websocket.service"; 
+import { WebSocketEvent, WebSocketService } from "../websocket.service";
 
 @Component({
   selector: "app-chat-page",
@@ -18,66 +17,51 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   username: string | null = null;
   usernameSubscription: Subscription;
 
-  messages: Message[] = [];
-  messagesSubscription: Subscription;
+  notifications$: Observable<WebSocketEvent> | null = null;
+  notificationsSubscription: Subscription | null = null;
 
   constructor(
     private router: Router,
     private messagesService: MessagesService,
     private authenticationService: AuthenticationService,
-    private webSocketService: WebSocketService 
+    private webSocketService: WebSocketService
   ) {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
     });
-    this.messagesSubscription = this.messages$.subscribe((m) => {
-      this.messages = m;
-    });
   }
 
-  ngOnInit(): void {
-    if (this.authenticationService.isLoggedIn()) {
+  ngOnInit() {
+    this.notifications$ = this.webSocketService.connect();
+    this.notificationsSubscription = this.notifications$.subscribe(() => {
       this.messagesService.fetchMessages();
-      // Connectez-vous au WebSocket et rafraichissez la liste de messages
-      this.webSocketService.connect().subscribe((event) => {
-        if (event === "notif") {
-          this.messagesService.fetchMessages();
-        }
-      });
-    }
+    });
+    this.messagesService.fetchMessages();
   }
 
   ngOnDestroy(): void {
     if (this.usernameSubscription) {
       this.usernameSubscription.unsubscribe();
     }
-    if (this.messagesSubscription) {
-      this.messagesSubscription.unsubscribe();
+    if (this.notificationsSubscription) {
+      this.notificationsSubscription.unsubscribe();
     }
-    // Déconnectez-vous du WebSocket
     this.webSocketService.disconnect();
   }
 
-  onPublishMessage(message: string) {
-    if (this.authenticationService.isLoggedIn()) {
-      if (this.username != null) {
-        const newMessage: Message = {
-          id: Date.now(), 
-          text: message,
-          username: this.username,
-          timestamp: Date.now(),
-        };
-        this.messagesService.postMessage(newMessage);
-      }
-    } else {
-      
-      console.log("Vous devez être connecté pour publier un message.");
-      this.router.navigate(["/login"]);
+  async onPublishMessage(message: string) {
+    if (this.username != null) {
+      await this.messagesService.postMessage({
+        text: message,
+        username: this.username,
+      });
     }
   }
 
   onLogout() {
+    this.webSocketService.disconnect();
     this.authenticationService.logout();
+    this.messagesService.clear();
     this.router.navigate(["/"]);
   }
 }

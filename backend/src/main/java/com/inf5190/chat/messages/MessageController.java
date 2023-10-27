@@ -5,12 +5,18 @@ import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.repository.MessageRepository;
 import com.inf5190.chat.websocket.WebSocketManager;
 
-import org.springframework.http.ResponseEntity;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Contrôleur qui gère l'API de messages.
+ */
 @RestController
 public class MessageController {
     public static final String MESSAGES_PATH = "/messages";
@@ -25,17 +31,17 @@ public class MessageController {
         this.webSocketManager = webSocketManager;
     }
 
-        
     @GetMapping(MESSAGES_PATH)
-    public ResponseEntity<?> getMessages() {
-        return ResponseEntity.ok(messageRepository.getMessages(null));
+    public List<Message> getMessages(@RequestParam Optional<Long> fromId) {
+        return this.messageRepository.getMessages(fromId.orElse(null));
     }
 
     @PostMapping(MESSAGES_PATH)
-    public ResponseEntity<?> createMessage(@RequestBody Message message) {
-        Message newMessage = messageRepository.createMessage(message);
-        // Notifie toutes les sessions websocket actives après la publication d'un message
-        webSocketManager.notifySessions();
-        return ResponseEntity.ok(newMessage);
+    public Message createMessage(@RequestBody Message message) {
+        Message newMessage = this.messageRepository.createMessage(message);
+
+        this.webSocketManager.notifySessions();
+
+        return newMessage;
     }
 }

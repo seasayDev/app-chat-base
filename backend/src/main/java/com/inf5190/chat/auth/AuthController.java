@@ -1,5 +1,7 @@
 package com.inf5190.chat.auth;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.http.Cookie;
 
 import org.springframework.http.HttpHeaders;
@@ -32,43 +34,32 @@ public class AuthController {
 
     @PostMapping(AUTH_LOGIN_PATH)
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        // Créer un nouvel objet de type SessionData
-        SessionData sessionData = new SessionData(loginRequest.username());
+        String sessionId = this.sessionManager.addSession(new SessionData(loginRequest.username()));
 
-        // Ajouter cet objet dans le SessionManager
-        String sessionId = this.sessionManager.addSession(sessionData);
+        ResponseCookie sessionCookie = this.createResponseSessionCookie(sessionId, TimeUnit.DAYS.toSeconds(1));
 
-        // Créer un cookie HTTP nommé 
-        ResponseCookie cookie = ResponseCookie.from(SESSION_ID_COOKIE_NAME, sessionId)
-            .httpOnly(true) 
-            .secure(true) 
-            .path("/") 
-            .maxAge(24 * 60 * 60) 
-            .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, sessionCookie.toString())
+                .body(new LoginResponse(loginRequest.username()));
 
-        // Créer un objet de type LoginResponse 
-        LoginResponse loginResponse = new LoginResponse(loginRequest.username());
-
-        // Construire la réponse avec le cookie et le corps
-        return ResponseEntity.ok() 
-            .header(HttpHeaders.SET_COOKIE, cookie.toString()) 
-            .body(loginResponse); 
     }
 
     @PostMapping(AUTH_LOGOUT_PATH)
     public ResponseEntity<Void> logout(@CookieValue("sid") Cookie sessionCookie) {
-        String sessionId = sessionCookie.getValue();
-        this.sessionManager.removeSession(sessionId);
+        this.sessionManager.removeSession(sessionCookie.getValue());
 
-        ResponseCookie cookie = ResponseCookie.from(SESSION_ID_COOKIE_NAME, "")
-            .httpOnly(true) 
-            .secure(true) 
-            .path("/") 
-            .maxAge(0) 
-            .build();
-
+        ResponseCookie deleteSessionCookie = this.createResponseSessionCookie(null, 0);
         return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, cookie.toString())
-            .build();
+                .header(HttpHeaders.SET_COOKIE, deleteSessionCookie.toString()).body(null);
+
+    }
+
+    private ResponseCookie createResponseSessionCookie(String sessiondId, long maxAge) {
+        return ResponseCookie.from(SESSION_ID_COOKIE_NAME, sessiondId)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(maxAge)
+                .build();
     }
 }

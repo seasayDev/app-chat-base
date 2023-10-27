@@ -1,6 +1,7 @@
 package com.inf5190.chat.messages.repository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -8,27 +9,32 @@ import com.inf5190.chat.messages.model.Message;
 
 import org.springframework.stereotype.Repository;
 
+/**
+ * Classe qui gère la persistence des messages.
+ * 
+ * En mémoire pour le moment.
+ */
 @Repository
 public class MessageRepository {
     private final List<Message> messages = new ArrayList<Message>();
     private final AtomicLong idGenerator = new AtomicLong(0);
 
-   public List<Message> getMessages(Long fromId) {
-    // Ignorer le paramètre fromId pour le moment
-    return new ArrayList<>(messages);
-}
+    public List<Message> getMessages(Long fromId) {
+        List<Message> messages = this.messages.stream().sorted(Comparator.comparingLong((m) -> m.timestamp())).toList();
+        if (fromId == null) {
+            return messages;
+        }
 
-public Message createMessage(Message message) {
-    // Générer un nouvel ID pour le message
-    long id = idGenerator.incrementAndGet();
+        return messages.stream().dropWhile((m) -> m.id() != fromId).skip(1).toList();
+    }
 
-    // Créer un nouveau message avec l'ID généré
-    Message newMessage = new Message(id, message.username(), message.timestamp(), message.text());
+    public Message createMessage(Message message) {
+        Message newMessage = new Message(this.idGenerator.incrementAndGet(), message.username(),
+                System.currentTimeMillis(),
+                message.text());
 
-    // Ajouter le message à la liste
-    messages.add(newMessage);
-
-    return newMessage;
-}
+        this.messages.add(newMessage);
+        return newMessage;
+    }
 
 }

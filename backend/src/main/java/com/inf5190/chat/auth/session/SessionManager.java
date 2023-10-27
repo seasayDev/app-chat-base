@@ -33,4 +33,5 @@ public class SessionManager {
     private String generateSessionId() {
         return UUID.randomUUID().toString();
     }
+
 }

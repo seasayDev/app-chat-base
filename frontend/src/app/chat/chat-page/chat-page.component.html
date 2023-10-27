@@ -6,7 +6,7 @@
   </div>
   <div class="chat-messages">
     <div>
-      <app-messages [messages]="messages"></app-messages>
+      <app-messages [messages]="(messages$ | async)!"></app-messages>
       <app-new-message-form
         (newMessage)="onPublishMessage($event)"
       ></app-new-message-form>

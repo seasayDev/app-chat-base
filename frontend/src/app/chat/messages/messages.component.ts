@@ -15,12 +15,11 @@ import { Message } from "../message.model";
 export class MessagesComponent implements AfterViewChecked {
   private SCROLL_BOTTOM_TOLERANCE_IN_PX = 20;
 
-  @ViewChild("chatContainer") private chatContainer: ElementRef | undefined =
-    undefined;
+  @ViewChild("chatContainer") private chatContainer:
+    | ElementRef
+    | undefined = undefined;
 
-  // Doit défiler vers le bas lors de la création du composant.
-  private shouldScrollToBottomAfterViewChecked = true;
-
+  private shouldScroll = false;
   private _messages: Message[] = [];
 
   @Input()
@@ -30,7 +29,7 @@ export class MessagesComponent implements AfterViewChecked {
 
   set messages(messages: Message[]) {
     if (this.shouldScrollBottom(messages)) {
-      this.shouldScrollToBottomAfterViewChecked = true;
+      this.shouldScroll = true;
     }
     this._messages = messages;
   }
@@ -50,9 +49,9 @@ export class MessagesComponent implements AfterViewChecked {
   }
 
   ngAfterViewChecked() {
-    if (this.shouldScrollToBottomAfterViewChecked) {
+    if (this.shouldScroll) {
       this.scrollToBottom();
-      this.shouldScrollToBottomAfterViewChecked = false;
+      this.shouldScroll = false;
     }
   }
 
@@ -84,21 +83,20 @@ export class MessagesComponent implements AfterViewChecked {
    *
    * Si le bas du chat n'est pas visible c'est que l'utilisateur a intentionnellement
    * fait défiler le chat vers le haut donc on ne veut pas forcer un défilement vers le bas.
-   **/
+   */
   private chatBottomVisible(): Boolean {
     return (
-      !!this.chatContainer &&
-      this.chatContainer.nativeElement.scrollHeight -
-        (this.chatContainer.nativeElement.scrollTop +
-          this.chatContainer.nativeElement.clientHeight) <=
-        this.SCROLL_BOTTOM_TOLERANCE_IN_PX
+      this.chatContainer?.nativeElement.scrollHeight -
+        (this.chatContainer?.nativeElement.scrollTop +
+          this.chatContainer?.nativeElement.clientHeight) <=
+      this.SCROLL_BOTTOM_TOLERANCE_IN_PX
     );
   }
 
   private scrollToBottom(): void {
     if (this.chatContainer != null) {
-      this.chatContainer.nativeElement.scrollTop =
-        this.chatContainer.nativeElement.scrollHeight;
+      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
     }
   }
 }
