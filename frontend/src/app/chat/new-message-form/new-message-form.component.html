@@ -4,5 +4,16 @@
     <button mat-icon-button matSuffix type="submit">
       <mat-icon>send</mat-icon>
     </button>
+    <input
+      #file
+      name="file"
+      type="file"
+      style="display: none"
+      accept="image/*"
+      (change)="fileChanged($event)"
+    />
+    <span matSuffix (click)="file.click()">
+      <mat-icon>image</mat-icon>
+    </span>
   </mat-form-field>
 </form>

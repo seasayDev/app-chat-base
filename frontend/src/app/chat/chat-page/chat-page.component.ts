@@ -4,6 +4,7 @@ import { AuthenticationService } from "src/app/login/authentication.service";
 import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
 import { WebSocketEvent, WebSocketService } from "../websocket.service";
+import { NewMessageRequest, ChatImageData } from "../message.model";
 
 @Component({
   selector: "app-chat-page",
@@ -49,12 +50,15 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.webSocketService.disconnect();
   }
 
-  async onPublishMessage(message: string) {
+  async onPublishMessage(message: {
+    text: string;
+    imageData: ChatImageData | null;
+  }) {
     if (this.username != null) {
       await this.messagesService.postMessage({
-        text: message,
+        text: message.text,
         username: this.username,
-        imageData: null,
+        imageData: message.imageData,
       });
     }
   }

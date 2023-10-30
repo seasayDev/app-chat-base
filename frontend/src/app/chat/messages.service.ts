@@ -19,7 +19,7 @@ export class MessagesService {
         {
           text: message.text,
           username: message.username,
-          imageData: null, // assigner la valeur null au champ imageData pour le moment
+          imageData: message.imageData,
         },
         {
           withCredentials: true,

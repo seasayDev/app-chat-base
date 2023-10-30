@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Output } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
+import { ChatImageData } from "../message.model";
+import { FileReaderService } from "../filereader.service";
 
 @Component({
   selector: "app-new-message-form",
@@ -12,14 +14,31 @@ export class NewMessageFormComponent {
   });
 
   @Output()
-  newMessage = new EventEmitter<string>();
+  newMessage = new EventEmitter<{
+    text: string;
+    imageData: ChatImageData | null;
+  }>();
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private fileReaderService: FileReaderService
+  ) {}
 
-  onSendMessage() {
+  file: File | null = null;
+
+  async onSendMessage() {
     if (this.messageForm.valid && this.messageForm.value.msg) {
-      this.newMessage.emit(this.messageForm.value.msg);
+      let imageData: ChatImageData | null = null;
+      if (this.file) {
+        imageData = await this.fileReaderService.readFile(this.file);
+      }
+      this.newMessage.emit({ text: this.messageForm.value.msg, imageData });
       this.messageForm.reset();
+      this.file = null;
     }
+  }
+
+  fileChanged(event: any) {
+    this.file = event.target.files[0];
   }
 }
