@@ -15,9 +15,8 @@ import { Message } from "../message.model";
 export class MessagesComponent implements AfterViewChecked {
   private SCROLL_BOTTOM_TOLERANCE_IN_PX = 20;
 
-  @ViewChild("chatContainer") private chatContainer:
-    | ElementRef
-    | undefined = undefined;
+  @ViewChild("chatContainer") private chatContainer: ElementRef | undefined =
+    undefined;
 
   private shouldScroll = false;
   private _messages: Message[] = [];
@@ -95,8 +94,10 @@ export class MessagesComponent implements AfterViewChecked {
 
   private scrollToBottom(): void {
     if (this.chatContainer != null) {
-      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
-      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      this.chatContainer.nativeElement.scrollTop =
+        this.chatContainer.nativeElement.scrollHeight;
+      this.chatContainer.nativeElement.scrollTop =
+        this.chatContainer.nativeElement.scrollHeight;
     }
   }
 }
