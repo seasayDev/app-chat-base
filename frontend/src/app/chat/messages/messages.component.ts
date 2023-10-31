@@ -101,6 +101,7 @@ export class MessagesComponent implements AfterViewChecked {
     }
   }
 
+  /**Obtenir l'url de l'image à afficher. */
   getImageUrl(message: Message): string | null {
     if (message.imageUrl) {
       return message.imageUrl;

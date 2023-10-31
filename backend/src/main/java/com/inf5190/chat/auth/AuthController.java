@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
-
 import com.inf5190.chat.auth.model.LoginRequest;
 import com.inf5190.chat.auth.model.LoginResponse;
 import com.inf5190.chat.auth.repository.FirestoreUserAccount;
@@ -37,24 +36,27 @@ public class AuthController {
     private final UserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthController(SessionManager sessionManager, UserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(SessionManager sessionManager, UserAccountRepository userAccountRepository,
+            PasswordEncoder passwordEncoder) {
         this.sessionManager = sessionManager;
         this.userAccountRepository = userAccountRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping(AUTH_LOGIN_PATH)
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws
-InterruptedException, ExecutionException {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest)
+            throws InterruptedException, ExecutionException {
         FirestoreUserAccount userAccount = userAccountRepository.getUserAccount(loginRequest.username());
 
-        // Si le compte n'existe pas, créer un compte utilisateur avec le nom d'utilisateur et le mot de passe encodé
+        // Si le compte n'existe pas, créer un compte utilisateur avec le nom
+        // d'utilisateur et le mot de passe encodé
         if (userAccount == null) {
             String encodedPassword = passwordEncoder.encode(loginRequest.password());
             userAccount = new FirestoreUserAccount(loginRequest.username(), encodedPassword);
             userAccountRepository.setUserAccount(userAccount);
         } else {
-            // Si le compte existe, valider que le mot de passe correspond à celui stocké dans Firestore
+            // Si le compte existe, valider que le mot de passe correspond à celui stocké
+            // dans Firestore
             boolean matches = passwordEncoder.matches(loginRequest.password(), userAccount.getEncodedPassword());
             if (!matches) {
                 // Si le mot de passe ne correspond pas, lancer une exception

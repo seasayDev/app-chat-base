@@ -8,7 +8,7 @@ import com.inf5190.chat.websocket.WebSocketManager;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException; 
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,8 +24,8 @@ public class MessageController {
     private WebSocketManager webSocketManager;
 
     public MessageController(MessageRepository messageRepository,
-                             WebSocketManager webSocketManager,
-                             SessionDataAccessor sessionDataAccessor) {
+            WebSocketManager webSocketManager,
+            SessionDataAccessor sessionDataAccessor) {
         this.messageRepository = messageRepository;
         this.webSocketManager = webSocketManager;
     }
@@ -36,7 +36,8 @@ public class MessageController {
     }
 
     @PostMapping(MESSAGES_PATH)
-    public Message createMessage(@RequestBody NewMessageRequest newMessageRequest) throws InterruptedException, ExecutionException {
+    public Message createMessage(@RequestBody NewMessageRequest newMessageRequest)
+            throws InterruptedException, ExecutionException {
         Message newMessage = this.messageRepository.createMessage(newMessageRequest);
 
         this.webSocketManager.notifySessions();

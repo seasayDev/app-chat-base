@@ -23,8 +23,7 @@ public class SessionManager {
     private static final String SECRET_KEY_BASE64 = "Xzg7nu3URqTLiv+sfKwV/aP3VAaAi2136Xx2OI2c++8=";
     private final SecretKey secretKey;
     private final JwtParser jwtParser;
-    
-    
+
     public SessionManager() {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY_BASE64));
         this.jwtParser = Jwts.parser().setSigningKey(this.secretKey).build();

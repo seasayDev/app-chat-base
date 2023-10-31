@@ -10,10 +10,9 @@ import com.google.cloud.storage.StorageOptions;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Acl;
 
-
 import com.inf5190.chat.messages.model.Message;
-import com.inf5190.chat.messages.model.NewMessageRequest; 
-import com.inf5190.chat.messages.model.ChatImageData; 
+import com.inf5190.chat.messages.model.NewMessageRequest;
+import com.inf5190.chat.messages.model.ChatImageData;
 import org.springframework.stereotype.Repository;
 
 import java.io.FileInputStream;
@@ -25,7 +24,9 @@ import java.util.stream.Collectors;
 
 @Repository
 public class MessageRepository {
+
     private final Firestore firestore;
+    private final String BUCKET_NAME = "inf5190-chat-72110.appspot.com";
 
     public MessageRepository() {
         this.firestore = FirestoreClient.getFirestore();
@@ -41,28 +42,28 @@ public class MessageRepository {
             List<QueryDocumentSnapshot> documents = query.get().get().getDocuments();
 
             List<Message> messages = documents.stream()
-                .map(doc -> {
-                    Timestamp timestamp = doc.getTimestamp("timestamp");
-                    Long timestampMillis = timestamp != null ? timestamp.toDate().getTime() : null;
-                    return new Message(
-                        doc.getId(),
-                        doc.getString("username"),
-                        timestampMillis,
-                        doc.getString("text"),
-                        doc.getString("imageUrl")
-                    );
-                })
-                .collect(Collectors.toList());
+                    .map(doc -> {
+                        Timestamp timestamp = doc.getTimestamp("timestamp");
+                        Long timestampMillis = timestamp != null ? timestamp.toDate().getTime() : null;
+                        return new Message(
+                                doc.getId(),
+                                doc.getString("username"),
+                                timestampMillis,
+                                doc.getString("text"),
+                                doc.getString("imageUrl"));
+                    })
+                    .collect(Collectors.toList());
 
             return messages;
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
-            return null; 
+            return null;
         }
     }
 
     public Message createMessage(NewMessageRequest newMessageRequest) throws InterruptedException, ExecutionException {
-        FirestoreMessage firestoreMessage = new FirestoreMessage(newMessageRequest.username(), Timestamp.now(), newMessageRequest.text(), null);
+        FirestoreMessage firestoreMessage = new FirestoreMessage(newMessageRequest.username(), Timestamp.now(),
+                newMessageRequest.text(), null);
         CollectionReference messagesRef = firestore.collection("messages");
         DocumentReference docRef = messagesRef.add(firestoreMessage).get();
         String id = docRef.getId();
@@ -76,7 +77,8 @@ public class MessageRepository {
 
         DocumentSnapshot documentSnapshot = docRef.get().get();
         Timestamp timestamp = documentSnapshot.getUpdateTime();
-        Message newMessage = new Message(id, newMessageRequest.username(), timestamp.toDate().getTime(), newMessageRequest.text(), imageUrl);
+        Message newMessage = new Message(id, newMessageRequest.username(), timestamp.toDate().getTime(),
+                newMessageRequest.text(), imageUrl);
         return newMessage;
     }
 
@@ -85,25 +87,23 @@ public class MessageRepository {
         Storage storage = null;
         try {
             storage = StorageOptions.newBuilder()
-              .setCredentials(GoogleCredentials.fromStream(new FileInputStream("firebase-key.json")))
-              .build()
-              .getService();
+                    .setCredentials(GoogleCredentials.fromStream(new FileInputStream("firebase-key.json")))
+                    .build()
+                    .getService();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         // Préparez l'image pour l'upload
         byte[] imageBytes = Base64.getDecoder().decode(imageData.data());
-        BlobId blobId = BlobId.of("inf5190-chat-72110.appspot.com", "images/"+id);
+        BlobId blobId = BlobId.of(BUCKET_NAME, "images/" + id);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(imageData.type()).build();
 
         // Upload l'image vers Cloud Storage
         storage.create(blobInfo, imageBytes);
 
-
         // Rendre l'image accessible publiquement
         storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-
 
         // Générez l'URL de l'image
         return String.format("https://storage.googleapis.com/%s/%s", blobId.getBucket(), blobId.getName());

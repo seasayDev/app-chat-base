@@ -31,11 +31,10 @@ public class ChatApplication {
   public static void main(String[] args) {
     try {
       if (FirebaseApp.getApps().size() == 0) {
-        FileInputStream serviceAccount = new
-        FileInputStream("firebase-key.json");
+        FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
         FirebaseOptions options = FirebaseOptions.builder()
-          .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-          .build();
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            .build();
         LOGGER.info("Initializing Firebase application.");
         FirebaseApp.initializeApp(options);
       }
@@ -51,19 +50,19 @@ public class ChatApplication {
    */
   @Bean
   public FilterRegistrationBean<AuthFilter> authenticationFilter(
-    SessionDataAccessor sessionDataAccessor,
-    SessionManager sessionManager) {
+      SessionDataAccessor sessionDataAccessor,
+      SessionManager sessionManager) {
     FilterRegistrationBean<AuthFilter> registrationBean = new FilterRegistrationBean<>();
 
     registrationBean.setFilter(new AuthFilter(sessionDataAccessor,
-      sessionManager));
+        sessionManager));
     registrationBean.addUrlPatterns(MessageController.MESSAGES_PATH, AuthController.AUTH_LOGOUT_PATH);
 
     return registrationBean;
   }
 
   /**
-   * Fonction qui encode le mot de passe  
+   * Fonction qui encode le mot de passe
    */
   @Bean
   public PasswordEncoder getPasswordEncoder() {
