@@ -100,4 +100,11 @@ export class MessagesComponent implements AfterViewChecked {
         this.chatContainer.nativeElement.scrollHeight;
     }
   }
+
+  getImageUrl(message: Message): string | null {
+    if (message.imageUrl) {
+      return message.imageUrl;
+    }
+    return null;
+  }
 }

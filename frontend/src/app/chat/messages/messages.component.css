@@ -5,6 +5,12 @@
   padding: 30px 30px 10px 30px;
 }
 
+.messages img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
 p {
   margin: 10px;
 }

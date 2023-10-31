@@ -4,6 +4,6 @@
       {{ m.timestamp | date }}
     </h3>
     <p>[{{ m.timestamp | date : "hh:mm" }}] {{ m.username }} : {{ m.text }}</p>
-    <img *ngIf="m.imageUrl" [src]="m.imageUrl" alt="Image de chat" />
+    <img *ngIf="getImageUrl(m)" [src]="getImageUrl(m)" alt="Image de chat" />
   </div>
 </div>

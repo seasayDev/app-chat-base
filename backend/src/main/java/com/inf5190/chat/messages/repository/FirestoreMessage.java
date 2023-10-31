@@ -11,7 +11,7 @@ public class FirestoreMessage {
     public FirestoreMessage() {
     }
 
-    public FirestoreMessage(String username, Timestamp timestamp, String text, String imageUrl) { // Modifiez cette ligne
+    public FirestoreMessage(String username, Timestamp timestamp, String text, String imageUrl) { 
         this.username = username;
         this.timestamp = timestamp;
         this.text = text;

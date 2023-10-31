@@ -8,6 +8,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.Acl;
+
 
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest; 
@@ -92,11 +94,16 @@ public class MessageRepository {
 
         // Préparez l'image pour l'upload
         byte[] imageBytes = Base64.getDecoder().decode(imageData.data());
-        BlobId blobId = BlobId.of("inf5190-chat-72110.appspot.com", id);
+        BlobId blobId = BlobId.of("inf5190-chat-72110.appspot.com", "images/"+id);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(imageData.type()).build();
 
         // Upload l'image vers Cloud Storage
         storage.create(blobInfo, imageBytes);
+
+
+        // Rendre l'image accessible publiquement
+        storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+
 
         // Générez l'URL de l'image
         return String.format("https://storage.googleapis.com/%s/%s", blobId.getBucket(), blobId.getName());
