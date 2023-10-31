@@ -1,3 +1,4 @@
+// MessageRepository.java
 package com.inf5190.chat.messages.repository;
 
 import com.google.cloud.firestore.*;
@@ -12,7 +13,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest; 
 import com.inf5190.chat.messages.model.ChatImageData; 
-
 import org.springframework.stereotype.Repository;
 
 import java.io.FileInputStream;
@@ -69,6 +69,8 @@ public class MessageRepository {
         String imageUrl = null;
         if (newMessageRequest.imageData() != null) {
             imageUrl = uploadImageToCloudStorage(newMessageRequest.imageData(), id);
+            // Mettez à jour le document avec l'URL de l'image
+            docRef.update("imageUrl", imageUrl);
         }
 
         DocumentSnapshot documentSnapshot = docRef.get().get();
