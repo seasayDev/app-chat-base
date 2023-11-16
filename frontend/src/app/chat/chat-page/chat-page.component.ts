@@ -4,7 +4,7 @@ import { AuthenticationService } from "src/app/login/authentication.service";
 import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
 import { WebSocketEvent, WebSocketService } from "../websocket.service";
-import { NewMessageRequest, ChatImageData } from "../message.model";
+import { FileReaderService } from "../file-reader.service";
 
 @Component({
   selector: "app-chat-page",
@@ -25,7 +25,8 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     private router: Router,
     private messagesService: MessagesService,
     private authenticationService: AuthenticationService,
-    private webSocketService: WebSocketService
+    private webSocketService: WebSocketService,
+    private fileReaderService: FileReaderService
   ) {
     this.usernameSubscription = this.username$.subscribe((u) => {
       this.username = u;
@@ -50,23 +51,24 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.webSocketService.disconnect();
   }
 
-  async onPublishMessage(message: {
-    text: string;
-    imageData: ChatImageData | null;
-  }) {
+  async onPublishMessage(event: { message: string; file: File | null }) {
     if (this.username != null) {
+      const imageData =
+        event.file != null
+          ? await this.fileReaderService.readFile(event.file)
+          : null;
+
       await this.messagesService.postMessage({
-        text: message.text,
+        text: event.message,
         username: this.username,
-        imageData: message.imageData,
+        imageData: imageData,
       });
     }
   }
 
-  onLogout() {
-    this.webSocketService.disconnect();
-    this.authenticationService.logout();
+  async onLogout() {
     this.messagesService.clear();
+    await this.authenticationService.logout();
     this.router.navigate(["/"]);
   }
 }

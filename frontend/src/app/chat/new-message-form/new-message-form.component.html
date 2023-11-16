@@ -7,12 +7,17 @@
       type="file"
       style="display: none"
       accept="image/*"
+      formControlName="filename"
       (change)="fileChanged($event)"
     />
     <span matSuffix (click)="file.click()">
-      <mat-icon>image</mat-icon>
+      <mat-icon *ngIf="!hasImage; else withImage">add_photo_alternate</mat-icon>
+      <ng-template #withImage>
+        <mat-icon>image</mat-icon>
+      </ng-template>
     </span>
-    <button mat-icon-button matSuffix type="submit">
+
+    <button mat-icon-button matSuffix type="submit" autofocus>
       <mat-icon>send</mat-icon>
     </button>
   </mat-form-field>

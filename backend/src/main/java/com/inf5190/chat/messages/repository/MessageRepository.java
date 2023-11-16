@@ -1,111 +1,85 @@
 package com.inf5190.chat.messages.repository;
 
-import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Bucket.BlobTargetOption;
+import com.google.cloud.storage.Storage.PredefinedAcl;
+import com.google.firebase.cloud.StorageClient;
 import com.google.cloud.Timestamp;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.Acl;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.Query;
+import com.google.firebase.cloud.FirestoreClient;
 
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest;
-import com.inf5190.chat.messages.model.ChatImageData;
+
+import io.jsonwebtoken.io.Decoders;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Base64;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
+/**
+ * Classe qui gère la persistence des messages.
+ * 
+ * En mémoire pour le moment.
+ */
 @Repository
 public class MessageRepository {
+    private static final String COLLECTION_NAME = "messages";
+    private static final String BUCKET_NAME = "app-chat-a23.appspot.com";
+    private static final int DEFAULT_LIMIT = 20;
 
-    private final Firestore firestore;
-    private final String BUCKET_NAME = "inf5190-chat-72110.appspot.com";
+    private final Firestore firestore = FirestoreClient.getFirestore();
 
-    public MessageRepository() {
-        this.firestore = FirestoreClient.getFirestore();
-    }
+    public List<Message> getMessages(String fromId) throws InterruptedException, ExecutionException {
+        Query messageQuery = this.firestore.collection(COLLECTION_NAME).orderBy("timestamp");
 
-    public List<Message> getMessages(String fromId) {
-        try {
-            Query query = firestore.collection("messages").orderBy("timestamp").limit(20);
-            if (fromId != null) {
-                DocumentSnapshot lastSnapshot = firestore.collection("messages").document(fromId).get().get();
-                query = query.startAfter(lastSnapshot);
+        if (fromId != null) {
+            DocumentSnapshot fromIdDocument = this.firestore.collection(COLLECTION_NAME).document(fromId).get().get();
+            if (!fromIdDocument.exists()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message with id " + fromId + " not found.");
             }
-            List<QueryDocumentSnapshot> documents = query.get().get().getDocuments();
-
-            List<Message> messages = documents.stream()
-                    .map(doc -> {
-                        Timestamp timestamp = doc.getTimestamp("timestamp");
-                        Long timestampMillis = timestamp != null ? timestamp.toDate().getTime() : null;
-                        return new Message(
-                                doc.getId(),
-                                doc.getString("username"),
-                                timestampMillis,
-                                doc.getString("text"),
-                                doc.getString("imageUrl"));
-                    })
-                    .collect(Collectors.toList());
-
-            return messages;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return null;
+            messageQuery = messageQuery.startAfter(fromIdDocument);
+        } else {
+            messageQuery = messageQuery.limitToLast(DEFAULT_LIMIT);
         }
-    }
 
-    public Message createMessage(NewMessageRequest newMessageRequest) throws InterruptedException, ExecutionException {
-        FirestoreMessage firestoreMessage = new FirestoreMessage(newMessageRequest.username(), Timestamp.now(),
-                newMessageRequest.text(), null);
-        CollectionReference messagesRef = firestore.collection("messages");
-        DocumentReference docRef = messagesRef.add(firestoreMessage).get();
-        String id = docRef.getId();
+        return messageQuery.get().get().toObjects(FirestoreMessage.class).stream().map(message -> {
+            return this.toMessage(message.getId(), message);
+        }).toList();
+    };
+
+    public Message createMessage(NewMessageRequest message) throws InterruptedException, ExecutionException {
+        DocumentReference ref = this.firestore.collection(COLLECTION_NAME).document();
 
         String imageUrl = null;
-        if (newMessageRequest.imageData() != null) {
-            imageUrl = uploadImageToCloudStorage(newMessageRequest.imageData(), id);
-            // Mettez à jour le document avec l'URL de l'image
-            docRef.update("imageUrl", imageUrl);
+        if (message.imageData() != null) {
+            Bucket b = StorageClient.getInstance().bucket(BUCKET_NAME);
+            String path = String.format("images/%s.%s", ref.getId(), message.imageData().type());
+            b.create(path, Decoders.BASE64.decode(message.imageData().data()),
+                    BlobTargetOption.predefinedAcl(PredefinedAcl.PUBLIC_READ));
+            imageUrl = String.format("https://storage.googleapis.com/%s/%s", BUCKET_NAME, path);
         }
 
-        DocumentSnapshot documentSnapshot = docRef.get().get();
-        Timestamp timestamp = documentSnapshot.getUpdateTime();
-        Message newMessage = new Message(id, newMessageRequest.username(), timestamp.toDate().getTime(),
-                newMessageRequest.text(), imageUrl);
-        return newMessage;
+        FirestoreMessage firestoreMessage = new FirestoreMessage(
+                message.username(),
+                Timestamp.now(),
+                message.text(),
+                imageUrl);
+
+        ref.create(firestoreMessage).get();
+        return this.toMessage(ref.getId(), firestoreMessage);
     }
 
-    private String uploadImageToCloudStorage(ChatImageData imageData, String id) {
-        // Initialisez votre Cloud Storage
-        Storage storage = null;
-        try {
-            storage = StorageOptions.newBuilder()
-                    .setCredentials(GoogleCredentials.fromStream(new FileInputStream("firebase-key.json")))
-                    .build()
-                    .getService();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Préparez l'image pour l'upload
-        byte[] imageBytes = Base64.getDecoder().decode(imageData.data());
-        BlobId blobId = BlobId.of(BUCKET_NAME, "images/" + id);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(imageData.type()).build();
-
-        // Upload l'image vers Cloud Storage
-        storage.create(blobInfo, imageBytes);
-
-        // Rendre l'image accessible publiquement
-        storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-
-        // Générez l'URL de l'image
-        return String.format("https://storage.googleapis.com/%s/%s", blobId.getBucket(), blobId.getName());
+    private Message toMessage(String id, FirestoreMessage firestoreMessage) {
+        return new Message(id, firestoreMessage.getUsername(),
+                firestoreMessage.getTimestamp().toDate().getTime(), firestoreMessage.getText(),
+                firestoreMessage.getImageUrl());
     }
+
 }

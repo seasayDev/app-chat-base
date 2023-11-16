@@ -16,11 +16,7 @@ export class MessagesService {
     return firstValueFrom(
       this.httpClient.post<Message>(
         `${environment.backendUrl}/messages`,
-        {
-          text: message.text,
-          username: message.username,
-          imageData: message.imageData,
-        },
+        message,
         {
           withCredentials: true,
         }
@@ -33,10 +29,11 @@ export class MessagesService {
       this.messages.value.length > 0
         ? this.messages.value[this.messages.value.length - 1].id
         : null;
-    let queryParameters =
-      lastMessageId != null
-        ? new HttpParams().set("fromId", lastMessageId)
-        : new HttpParams();
+
+    const isIncrementalFetch = lastMessageId != null;
+    let queryParameters = isIncrementalFetch
+      ? new HttpParams().set("fromId", lastMessageId)
+      : new HttpParams();
 
     const messages = await firstValueFrom(
       this.httpClient.get<Message[]>(`${environment.backendUrl}/messages`, {
@@ -44,7 +41,9 @@ export class MessagesService {
         withCredentials: true,
       })
     );
-    this.messages.next([...this.messages.value, ...messages]);
+    this.messages.next(
+      isIncrementalFetch ? [...this.messages.value, ...messages] : messages
+    );
   }
 
   getMessages(): Observable<Message[]> {

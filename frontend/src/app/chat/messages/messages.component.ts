@@ -19,6 +19,7 @@ export class MessagesComponent implements AfterViewChecked {
     undefined;
 
   private shouldScroll = false;
+  private numberOfNewImagesToLoad = 0;
   private _messages: Message[] = [];
 
   @Input()
@@ -29,8 +30,13 @@ export class MessagesComponent implements AfterViewChecked {
   set messages(messages: Message[]) {
     if (this.shouldScrollBottom(messages)) {
       this.shouldScroll = true;
+      this.numberOfNewImagesToLoad += this.countNewImagesToLoad(messages);
     }
     this._messages = messages;
+  }
+
+  onImageLoaded() {
+    this.numberOfNewImagesToLoad--;
   }
 
   /** Afficher la date seulement si la date du message précédent est différente du message courant. */
@@ -50,7 +56,10 @@ export class MessagesComponent implements AfterViewChecked {
   ngAfterViewChecked() {
     if (this.shouldScroll) {
       this.scrollToBottom();
-      this.shouldScroll = false;
+      if (this.numberOfNewImagesToLoad === 0) {
+        // only reset the scroll when all new images have been loaded
+        this.shouldScroll = false;
+      }
     }
   }
 
@@ -60,6 +69,12 @@ export class MessagesComponent implements AfterViewChecked {
 
   private newMessageReceived(messages: Message[]): Boolean {
     return messages?.length > this._messages.length;
+  }
+
+  private countNewImagesToLoad(messages: Message[]): number {
+    return messages
+      ?.slice(this._messages.length)
+      .filter((message) => message.imageUrl != null).length;
   }
 
   /**
@@ -99,13 +114,5 @@ export class MessagesComponent implements AfterViewChecked {
       this.chatContainer.nativeElement.scrollTop =
         this.chatContainer.nativeElement.scrollHeight;
     }
-  }
-
-  /**Obtenir l'url de l'image à afficher. */
-  getImageUrl(message: Message): string | null {
-    if (message.imageUrl) {
-      return message.imageUrl;
-    }
-    return null;
   }
 }
