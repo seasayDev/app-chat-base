@@ -5,6 +5,7 @@ import { MessagesService } from "../messages.service";
 import { Router } from "@angular/router";
 import { WebSocketEvent, WebSocketService } from "../websocket.service";
 import { FileReaderService } from "../file-reader.service";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
   selector: "app-chat-page",
@@ -52,17 +53,25 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   async onPublishMessage(event: { message: string; file: File | null }) {
-    if (this.username != null) {
-      const imageData =
-        event.file != null
-          ? await this.fileReaderService.readFile(event.file)
-          : null;
+    try {
+      if (this.username != null) {
+        const imageData =
+          event.file != null
+            ? await this.fileReaderService.readFile(event.file)
+            : null;
 
-      await this.messagesService.postMessage({
-        text: event.message,
-        username: this.username,
-        imageData: imageData,
-      });
+        await this.messagesService.postMessage({
+          text: event.message,
+          username: this.username,
+          imageData: imageData,
+        });
+      }
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 403) {
+        this.authenticationService.logout();
+        this.router.navigate(["/"]);
+      }
+      throw error;
     }
   }
 
