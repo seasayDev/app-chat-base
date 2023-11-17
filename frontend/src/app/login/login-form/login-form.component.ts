@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
-import { FormBuilder } from "@angular/forms";
+import { FormBuilder, Validators } from "@angular/forms";
 import { UserCredentials } from "../model/user-credentials";
 
 @Component({
@@ -9,8 +9,8 @@ import { UserCredentials } from "../model/user-credentials";
 })
 export class LoginFormComponent implements OnInit {
   loginForm = this.fb.group({
-    username: "",
-    password: "",
+    username: ["", Validators.required],
+    password: ["", Validators.required],
   });
 
   @Output()
@@ -21,14 +21,10 @@ export class LoginFormComponent implements OnInit {
   ngOnInit(): void {}
 
   onLogin() {
-    if (
-      this.loginForm.valid &&
-      this.loginForm.value.username &&
-      this.loginForm.value.password
-    ) {
+    if (this.loginForm.valid) {
       this.login.emit({
-        username: this.loginForm.value.username,
-        password: this.loginForm.value.password,
+        username: this.loginForm.value.username ?? "",
+        password: this.loginForm.value.password ?? "",
       });
     }
   }
