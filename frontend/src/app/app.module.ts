@@ -15,6 +15,8 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { HttpClientModule } from "@angular/common/http";
+import { AuthenticationService } from "./login/authentication.service";
+import { LoginPageGuard } from "./guards/login-page.guard";
 
 @NgModule({
   declarations: [
@@ -36,7 +38,7 @@ import { HttpClientModule } from "@angular/common/http";
     MatIconModule,
     HttpClientModule,
   ],
-  providers: [],
+  providers: [AuthenticationService, LoginPageGuard],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

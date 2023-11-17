@@ -31,7 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Repository
 public class MessageRepository {
     private static final String COLLECTION_NAME = "messages";
-    private static final String BUCKET_NAME = "app-chat-a23.appspot.com";
+    private static final String BUCKET_NAME = "inf5190-chat-72110.appspot.com";
     private static final int DEFAULT_LIMIT = 20;
 
     private final Firestore firestore = FirestoreClient.getFirestore();
