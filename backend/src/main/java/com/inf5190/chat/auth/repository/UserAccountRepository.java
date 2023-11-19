@@ -8,13 +8,18 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
-import com.google.firebase.cloud.FirestoreClient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Repository
 public class UserAccountRepository {
     private static final String COLLECTION_NAME = "userAccounts";
 
-    private final Firestore firestore = FirestoreClient.getFirestore();
+    private final Firestore firestore;
+
+    @Autowired
+    public UserAccountRepository(Firestore firestore) {
+        this.firestore = firestore;
+    }
 
     public FirestoreUserAccount getUserAccount(String username) throws InterruptedException, ExecutionException {
         DocumentSnapshot account = this.firestore.collection(COLLECTION_NAME).document(username).get().get();

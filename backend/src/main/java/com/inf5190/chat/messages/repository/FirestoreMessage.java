@@ -3,6 +3,8 @@ package com.inf5190.chat.messages.repository;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.DocumentId;
 
+import java.util.Objects;
+
 public class FirestoreMessage {
     @DocumentId
     private String id;
@@ -56,5 +58,33 @@ public class FirestoreMessage {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        FirestoreMessage that = (FirestoreMessage) o;
+        return Objects.equals(id, that.id) && Objects.equals(username, that.username)
+                && Objects.equals(timestamp, that.timestamp) && Objects.equals(text, that.text)
+                && Objects.equals(imageUrl, that.imageUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, timestamp, text, imageUrl);
+    }
+
+    @Override
+    public String toString() {
+        return "FirestoreMessage{" +
+                "id='" + id + '\'' +
+                ", username='" + username + '\'' +
+                ", timestamp=" + timestamp +
+                ", text='" + text + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
     }
 }

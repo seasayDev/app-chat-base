@@ -12,7 +12,6 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
-import com.google.firebase.cloud.FirestoreClient;
 
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest;
@@ -22,6 +21,7 @@ import io.jsonwebtoken.io.Decoders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Classe qui gère la persistence des messages.
@@ -34,7 +34,14 @@ public class MessageRepository {
     private static final String BUCKET_NAME = "inf5190-chat-72110.appspot.com";
     private static final int DEFAULT_LIMIT = 20;
 
-    private final Firestore firestore = FirestoreClient.getFirestore();
+    private final Firestore firestore;
+    private final StorageClient storageClient;
+
+    @Autowired
+    public MessageRepository(Firestore firestore, StorageClient storageClient) {
+        this.firestore = firestore;
+        this.storageClient = storageClient;
+    }
 
     public List<Message> getMessages(String fromId) throws InterruptedException, ExecutionException {
         Query messageQuery = this.firestore.collection(COLLECTION_NAME).orderBy("timestamp");
@@ -59,7 +66,7 @@ public class MessageRepository {
 
         String imageUrl = null;
         if (message.imageData() != null) {
-            Bucket b = StorageClient.getInstance().bucket(BUCKET_NAME);
+            Bucket b = this.storageClient.bucket(BUCKET_NAME);
             String path = String.format("images/%s.%s", ref.getId(), message.imageData().type());
             b.create(path, Decoders.BASE64.decode(message.imageData().data()),
                     BlobTargetOption.predefinedAcl(PredefinedAcl.PUBLIC_READ));
