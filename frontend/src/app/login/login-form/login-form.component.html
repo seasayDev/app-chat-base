@@ -9,6 +9,7 @@
             name="username"
             type="text"
             formControlName="username"
+            data-testid="username-input"
           />
           <mat-error
             *ngIf="
@@ -29,6 +30,7 @@
             name="password"
             type="password"
             formControlName="password"
+            data-testid="password-input"
           />
           <mat-error
             *ngIf="
@@ -43,7 +45,14 @@
       </div>
     </div>
     <div>
-      <button mat-raised-button color="primary" type="submit">Connexion</button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        data-testid="submit-button"
+      >
+        Connexion
+      </button>
     </div>
   </form>
 </div>
