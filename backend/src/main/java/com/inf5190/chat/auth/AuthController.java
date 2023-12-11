@@ -19,9 +19,6 @@ import com.inf5190.chat.auth.repository.UserAccountRepository;
 import com.inf5190.chat.auth.session.SessionData;
 import com.inf5190.chat.auth.session.SessionManager;
 
-/**
- * Contrôleur qui gère l'API de login et logout.
- */
 @RestController()
 public class AuthController {
     public static final String AUTH_LOGIN_PATH = "/auth/login";
@@ -83,6 +80,7 @@ public class AuthController {
                 .path("/")
                 .httpOnly(true)
                 .secure(true)
+                .sameSite("None")
                 .maxAge(maxAge)
                 .build();
     }

@@ -18,21 +18,21 @@ import com.inf5190.chat.messages.model.NewMessageRequest;
 
 import io.jsonwebtoken.io.Decoders;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
-/**
- * Classe qui gère la persistence des messages.
- * 
- * En mémoire pour le moment.
- */
 @Repository
 public class MessageRepository {
     private static final String COLLECTION_NAME = "messages";
-    private static final String BUCKET_NAME = "inf5190-chat-72110.appspot.com";
     private static final int DEFAULT_LIMIT = 20;
 
     private final Firestore firestore;
     private final StorageClient storageClient;
+
+    @Autowired
+    @Qualifier("storageBucketName")
+    private String storageBucketName;
 
     public MessageRepository(Firestore firestore, StorageClient storageClient) {
         this.firestore = firestore;
@@ -62,11 +62,11 @@ public class MessageRepository {
 
         String imageUrl = null;
         if (message.imageData() != null) {
-            Bucket b = this.storageClient.bucket(BUCKET_NAME);
+            Bucket b = this.storageClient.bucket(storageBucketName);
             String path = String.format("images/%s.%s", ref.getId(), message.imageData().type());
             b.create(path, Decoders.BASE64.decode(message.imageData().data()),
                     BlobTargetOption.predefinedAcl(PredefinedAcl.PUBLIC_READ));
-            imageUrl = String.format("https://storage.googleapis.com/%s/%s", BUCKET_NAME, path);
+            imageUrl = String.format("https://storage.googleapis.com/%s/%s", storageBucketName, path);
         }
 
         FirestoreMessage firestoreMessage = new FirestoreMessage(
@@ -84,5 +84,4 @@ public class MessageRepository {
                 firestoreMessage.getTimestamp().toDate().getTime(), firestoreMessage.getText(),
                 firestoreMessage.getImageUrl());
     }
-
 }
