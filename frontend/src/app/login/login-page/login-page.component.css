@@ -1,5 +1,9 @@
 .error {
   color: red;
-  margin-top: 10px;
-  margin-left: 33px;
+}
+
+div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

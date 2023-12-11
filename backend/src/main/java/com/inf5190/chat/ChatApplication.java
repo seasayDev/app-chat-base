@@ -97,4 +97,5 @@ public class ChatApplication {
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

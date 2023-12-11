@@ -5,12 +5,12 @@ import com.inf5190.chat.auth.session.SessionData;
 import com.inf5190.chat.auth.session.SessionManager;
 import com.inf5190.chat.messages.model.Message;
 import com.inf5190.chat.messages.model.NewMessageRequest;
+import com.inf5190.chat.messages.repository.DocumentNotFoundException;
 import com.inf5190.chat.messages.repository.MessageRepository;
 import com.inf5190.chat.websocket.WebSocketManager;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -33,29 +33,29 @@ public class MessageController {
     private final SessionManager sessionManager;
 
     public MessageController(MessageRepository messageRepository,
-            WebSocketManager webSocketManager, SessionManager sessionManager) {
+            WebSocketManager webSocketManager,
+            SessionManager sessionManager) {
         this.messageRepository = messageRepository;
         this.webSocketManager = webSocketManager;
         this.sessionManager = sessionManager;
     }
 
     @GetMapping(MESSAGES_PATH)
-    public List<Message> getMessages(@RequestParam Optional<String> fromId)
-            throws InterruptedException, ExecutionException {
+    public List<Message> getMessages(@RequestParam Optional<String> fromId) {
         try {
             return this.messageRepository.getMessages(fromId.orElse(null));
+        } catch (DocumentNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Unexpected error on get messages.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error on get message.");
         }
     }
 
     @PostMapping(MESSAGES_PATH)
     public Message createMessage(@CookieValue(AuthController.SESSION_ID_COOKIE_NAME) String sessionCookie,
-            @RequestBody NewMessageRequest message)
-            throws InterruptedException, ExecutionException {
+            @RequestBody NewMessageRequest message) {
         try {
             if (sessionCookie == null || sessionCookie.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -74,8 +74,7 @@ public class MessageController {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Unexpected error on create message.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error on create message.");
         }
     }
 }

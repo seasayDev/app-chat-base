@@ -8,42 +8,51 @@ export type WebSocketEvent = "notif";
   providedIn: "root",
 })
 export class WebSocketService {
+  static ATTEMPT_DELAY_IN_MS = 2000;
+
+  private notifications: Subject<WebSocketEvent> | null = null;
   private ws: WebSocket | null = null;
-  private retryTimeout: any;
+  private shouldReconnect: boolean = false;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {}
 
   public connect(): Observable<WebSocketEvent> {
-    this.ws = new WebSocket(`${environment.wsUrl}/notifications`);
-    const events = new Subject<WebSocketEvent>();
-
-    this.ws.onopen = () => {
-      clearTimeout(this.retryTimeout);
-      this.retryTimeout = null;
-    };
-
-    this.ws.onmessage = () => events.next("notif");
-
-    this.ws.onclose = () => {
-      if (!this.retryTimeout) {
-        this.retryTimeout = setTimeout(() => this.connect(), 2000);
-      }
-      events.complete();
-    };
-
-    this.ws.onerror = () => {
-      events.error("error");
-      if (!this.retryTimeout) {
-        this.retryTimeout = setTimeout(() => this.connect(), 2000);
-      }
-    };
-
-    return events.asObservable();
+    this.shouldReconnect = true;
+    if (!this.notifications) {
+      this.notifications = new Subject<"notif">();
+      this.connectWebSocket();
+    }
+    return this.notifications.asObservable();
   }
 
   public disconnect() {
-    clearTimeout(this.retryTimeout);
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+    this.timeout = null;
+    this.shouldReconnect = false;
+    this.notifications?.complete();
+    this.notifications = null;
     this.ws?.close();
     this.ws = null;
+  }
+
+  private connectWebSocket() {
+    this.ws = new WebSocket(`${environment.wsUrl}/notifications`);
+    this.ws.onopen = () => this.notifications?.next("notif");
+    this.ws.onmessage = () => this.notifications?.next("notif");
+    this.ws.onclose = (e) => {
+      if (this.shouldReconnect) {
+        console.error("Websocket close, attempting reconnection in 2 seconds");
+        this.timeout = setTimeout(
+          () => this.connectWebSocket(),
+          WebSocketService.ATTEMPT_DELAY_IN_MS
+        );
+      }
+    };
+    this.ws.onerror = (e) => {
+      console.error("Error on web socket.");
+    };
   }
 }

@@ -1,30 +1,9 @@
-import { Injectable } from "@angular/core";
-import {
-  CanActivate,
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot,
-  Router,
-} from "@angular/router";
+import { CanActivateFn, Router } from "@angular/router";
 import { AuthenticationService } from "../login/authentication.service";
+import { inject } from "@angular/core";
 
-@Injectable({
-  providedIn: "root",
-})
-export class LoginPageGuard implements CanActivate {
-  constructor(
-    private authService: AuthenticationService,
-    private router: Router
-  ) {}
-
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean {
-    if (!this.authService.isConnected()) {
-      return true;
-    } else {
-      this.router.navigate(["/chat"]);
-      return false;
-    }
-  }
-}
+export const loginPageGuard: CanActivateFn = (route, state) => {
+  return inject(AuthenticationService).isConnected()
+    ? inject(Router).parseUrl("/chat")
+    : true;
+};

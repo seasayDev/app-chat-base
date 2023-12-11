@@ -25,18 +25,22 @@ export class AuthenticationService {
         { withCredentials: true }
       )
     );
-    localStorage.setItem(AuthenticationService.KEY, response.username);
+
+    this.setStoredUsername(response.username);
     this.username.next(response.username);
   }
 
   async logout() {
-    await firstValueFrom(
-      this.httpClient.post(`${environment.backendUrl}/auth/logout`, null, {
-        withCredentials: true,
-      })
-    );
-    localStorage.removeItem(AuthenticationService.KEY);
-    this.username.next(null);
+    try {
+      await firstValueFrom(
+        this.httpClient.post(`${environment.backendUrl}/auth/logout`, null, {
+          withCredentials: true,
+        })
+      );
+    } finally {
+      this.setStoredUsername(null);
+      this.username.next(null);
+    }
   }
 
   getUsername(): Observable<string | null> {
@@ -44,6 +48,18 @@ export class AuthenticationService {
   }
 
   isConnected(): boolean {
-    return localStorage.getItem(AuthenticationService.KEY) !== null;
+    return this.getStoredUsername() != null;
+  }
+
+  private getStoredUsername(): string | null {
+    return localStorage.getItem(AuthenticationService.KEY);
+  }
+
+  private setStoredUsername(username: string | null) {
+    if (username != null) {
+      localStorage.setItem(AuthenticationService.KEY, username);
+    } else {
+      localStorage.removeItem(AuthenticationService.KEY);
+    }
   }
 }

@@ -44,27 +44,27 @@ describe("AuthenticationService", () => {
     });
 
     it("should store and emit the username", async () => {
+      expect(await firstValueFrom(service.getUsername())).toBeNull();
+
       const loginPromise = service.login(loginData);
+
       const req = httpTestingController.expectOne(
         `${environment.backendUrl}/auth/login`
       );
       req.flush({ username: loginData.username });
 
-      // wait for the login to complete
       await loginPromise;
 
-      service.getUsername().subscribe((username) => {
-        expect(username).toBe(loginData.username);
-        expect(localStorage.getItem(AuthenticationService.KEY)).toBe(
-          loginData.username
-        );
-      });
+      expect(await firstValueFrom(service.getUsername())).toEqual(
+        loginData.username
+      );
+      expect(localStorage.getItem("username")).toEqual(loginData.username);
     });
   });
 
   describe("on logout", () => {
     beforeEach(() => {
-      localStorage.setItem(AuthenticationService.KEY, loginData.username);
+      localStorage.setItem("username", loginData.username);
 
       TestBed.configureTestingModule({ imports: [HttpClientTestingModule] });
       httpTestingController = TestBed.inject(HttpTestingController);
@@ -85,19 +85,21 @@ describe("AuthenticationService", () => {
     });
 
     it("should remove the username from the service and local storage", async () => {
+      expect(await firstValueFrom(service.getUsername())).toEqual(
+        loginData.username
+      );
+
       const logoutPromise = service.logout();
+
       const req = httpTestingController.expectOne(
         `${environment.backendUrl}/auth/logout`
       );
       req.flush({});
 
-      // wait for the logout to complete
       await logoutPromise;
 
-      service.getUsername().subscribe((username) => {
-        expect(username).toBeNull();
-        expect(localStorage.getItem(AuthenticationService.KEY)).toBeNull();
-      });
+      expect(await firstValueFrom(service.getUsername())).toBeNull();
+      expect(localStorage.getItem("username")).toBeNull();
     });
   });
 });

@@ -21,11 +21,33 @@ export class LoginFormComponent implements OnInit {
   ngOnInit(): void {}
 
   onLogin() {
-    if (this.loginForm.valid) {
+    if (
+      this.loginForm.valid &&
+      this.loginForm.value.username &&
+      this.loginForm.value.password
+    ) {
       this.login.emit({
-        username: this.loginForm.value.username ?? "",
-        password: this.loginForm.value.password ?? "",
+        username: this.loginForm.value.username,
+        password: this.loginForm.value.password,
       });
+    } else {
+      this.loginForm.markAllAsTouched();
     }
+  }
+
+  showMissingUsername() {
+    return this.showMissing("username");
+  }
+
+  showMissingPassword() {
+    return this.showMissing("password");
+  }
+
+  private showMissing(controlName: string) {
+    return (
+      this.loginForm.get(controlName)?.hasError("required") &&
+      (this.loginForm.get(controlName)?.dirty ||
+        this.loginForm.get(controlName)?.touched)
+    );
   }
 }

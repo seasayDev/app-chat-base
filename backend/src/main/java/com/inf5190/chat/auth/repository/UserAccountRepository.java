@@ -8,7 +8,6 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Repository
 public class UserAccountRepository {
@@ -16,7 +15,6 @@ public class UserAccountRepository {
 
     private final Firestore firestore;
 
-    @Autowired
     public UserAccountRepository(Firestore firestore) {
         this.firestore = firestore;
     }

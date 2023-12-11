@@ -37,9 +37,9 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.notifications$ = this.webSocketService.connect();
     this.notificationsSubscription = this.notifications$.subscribe(() => {
-      this.messagesService.fetchMessages();
+      this.fetchMessages();
     });
-    this.messagesService.fetchMessages();
+    this.fetchMessages();
   }
 
   ngOnDestroy(): void {
@@ -53,31 +53,46 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   async onPublishMessage(event: { message: string; file: File | null }) {
-    try {
-      if (this.username != null) {
-        const imageData =
-          event.file != null
-            ? await this.fileReaderService.readFile(event.file)
-            : null;
+    if (this.username != null) {
+      const imageData =
+        event.file != null
+          ? await this.fileReaderService.readFile(event.file)
+          : null;
 
+      try {
         await this.messagesService.postMessage({
           text: event.message,
           username: this.username,
           imageData: imageData,
         });
+      } catch (error) {
+        if (error instanceof HttpErrorResponse && error.status === 403) {
+          await this.onLogout();
+        } else {
+          console.error("Impossible d'envoyer le message.");
+        }
       }
-    } catch (error) {
-      if (error instanceof HttpErrorResponse && error.status === 403) {
-        this.authenticationService.logout();
-        this.router.navigate(["/"]);
-      }
-      throw error;
     }
   }
 
   async onLogout() {
-    this.messagesService.clear();
-    await this.authenticationService.logout();
-    this.router.navigate(["/"]);
+    try {
+      await this.authenticationService.logout();
+    } finally {
+      this.messagesService.clear();
+      this.router.navigate(["/"]);
+    }
+  }
+
+  private async fetchMessages() {
+    try {
+      await this.messagesService.fetchMessages();
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 403) {
+        await this.onLogout();
+      } else {
+        console.error("Impossible de charger les messages.");
+      }
+    }
   }
 }

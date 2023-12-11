@@ -10,7 +10,7 @@ import { HttpErrorResponse } from "@angular/common/http";
   styleUrls: ["./login-page.component.css"],
 })
 export class LoginPageComponent implements OnInit {
-  errorMessage: string | null = null;
+  loginErrorMessage: string | null = null;
 
   constructor(
     private authenticationService: AuthenticationService,
@@ -20,18 +20,15 @@ export class LoginPageComponent implements OnInit {
   ngOnInit(): void {}
 
   async onLogin(userCredentials: UserCredentials) {
+    this.loginErrorMessage = null;
     try {
       await this.authenticationService.login(userCredentials);
       this.router.navigate(["/chat"]);
     } catch (error) {
-      if (error instanceof HttpErrorResponse) {
-        if (error.status === 403) {
-          this.errorMessage = "Mot de passe invalide";
-        } else {
-          this.errorMessage = "Problème de connexion";
-        }
+      if (error instanceof HttpErrorResponse && error.status === 403) {
+        this.loginErrorMessage = "Mot de passe invalide";
       } else {
-        this.errorMessage = "Une erreur inattendue s'est produite";
+        this.loginErrorMessage = "Problème de connexion";
       }
     }
   }
